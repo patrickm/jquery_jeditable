@@ -300,24 +300,24 @@
 
                     /* Do no submit. */
                     e.preventDefault(); 
+
+                    var value = input.val();
             
                     /* Call before submit hook. */
                     /* If it returns false abort submitting. */                    
-                    if (false !== onsubmit.apply(form, [settings, self])) { 
+                    if (false !== onsubmit.apply(form, [settings, self, value])) { 
                         /* Custom inputs call before submit hook. */
                         /* If it returns false abort submitting. */
-                        if (false !== submit.apply(form, [settings, self])) { 
+                        if (false !== submit.apply(form, [settings, self, value])) { 
 
                           /* Check if given target is function */
                           if ($.isFunction(settings.target)) {
-                              var str = settings.target.apply(self, [input.val(), settings]);
-                              $(self).html(str);
-                              self.editing = false;
-                              callback.apply(self, [self.innerHTML, settings]);
-                              /* TODO: this is not dry */                              
-                              if (!$.trim($(self).html())) {
-                                  $(self).html(settings.placeholder);
-                                  $(self).removeClass('edit-edit');
+                              var str = settings.target.apply(self, [input.val(), settings, value]);
+                              if (str !== false) {
+                                  if ($.type(str) !== 'string') {
+                                      str = input.val();
+                                  }
+                                  self.finish(str, true);
                               }
                           } else {
                               /* Add edited content and id of edited element to POST. */
@@ -347,14 +347,10 @@
                                   url     : settings.target,
                                   success : function(result, status) {
                                       if (ajaxoptions.dataType == 'html') {
-                                        $(self).html(result);
+                                        $(self).html(result, true);
+                                      } else {
+                                          self.finish(null, true)
                                       }
-                                      self.editing = false;
-                                      callback.apply(self, [result, settings]);
-                                      if (!$.trim($(self).html())) {
-                                          $(self).html(settings.placeholder);
-                                      }
-                                      $(self).removeClass('edit-edit');
                                   },
                                   error   : function(xhr, status, error) {
                                       onerror.apply(form, [settings, self, xhr]);
@@ -394,7 +390,25 @@
                         $(self).removeClass('edit-edit');
                     }                    
                 }
-            };            
+            };
+
+            this.finish = function(str, fireCallback) {
+                if (typeof str !== "undefiend" && str !== null) {
+                    $(self).html(str);
+                }
+                self.editing = false;
+
+                if (fireCallback === true) {
+                    callback.apply(self, [self.innerHTML, settings]);
+                }
+
+                /* TODO: this is not dry */                              
+                if (!$.trim($(self).html())) {
+                    $(self).html(settings.placeholder);
+                }
+
+                $(self).removeClass('edit-edit');
+            };
         });
 
     };
