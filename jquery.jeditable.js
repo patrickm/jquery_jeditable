@@ -163,6 +163,8 @@
                             settings.autoheight ? $(self).height() : settings.height;
                     }
                 }
+
+                $(self).addClass('edit-edit');
                 
                 /* Remove placeholder text, replace is here because of IE. */
                 if ($(this).html().toLowerCase().replace(/(;|"|\/)/g, '') == 
@@ -315,6 +317,7 @@
                               /* TODO: this is not dry */                              
                               if (!$.trim($(self).html())) {
                                   $(self).html(settings.placeholder);
+                                  $(self).removeClass('edit-edit');
                               }
                           } else {
                               /* Add edited content and id of edited element to POST. */
@@ -351,6 +354,7 @@
                                       if (!$.trim($(self).html())) {
                                           $(self).html(settings.placeholder);
                                       }
+                                      $(self).removeClass('edit-edit');
                                   },
                                   error   : function(xhr, status, error) {
                                       onerror.apply(form, [settings, self, xhr]);
@@ -387,6 +391,7 @@
                         if (settings.tooltip) {
                             $(self).attr('title', settings.tooltip);                
                         }
+                        $(self).removeClass('edit-edit');
                     }                    
                 }
             };            
